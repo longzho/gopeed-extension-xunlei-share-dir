@@ -25,9 +25,9 @@
 ## 用法
 
   这个扩展只对分享链接生效，比如
-  ' https://pan.xunlei.com/s/... '
+  'https://pan.xunlei.com/s/...'
   它挂在 onResolve 上，清单里的匹配规则是
- *://pan.xunlei.com/s/*
+ '*://pan.xunlei.com/s/*'
   个人网盘、离线下载那类链接不会触发它。
 
 带子目录的分享链接长这样：
