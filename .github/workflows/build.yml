@@ -1,0 +1,26 @@
+name: build-extension
+on:
+  push:
+    paths:
+      - patch.py
+  workflow_dispatch:
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+      - name: clone upstream
+        run: git clone --depth 1 https://github.com/cybdarlnig-png/gopeed-extension-xunlei.git up
+      - name: apply patch
+        run: python3 patch.py
+      - name: copy files
+        run: cp up/index.js up/manifest.json up/icon.png up/README.md .
+      - name: commit
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -A
+          git commit -m "build: only parse the folder in the share url" || true
+          git push
