@@ -1,6 +1,6 @@
 {
-  "name": "xunlei-pan",
-  "author": "cybdarlnig-png",
+  "name": "xunlei-pan-share-dir",
+  "author": "longzho",
   "title": "迅雷云盘下载",
   "description": "解析迅雷云盘分享链接。默认只读取链接指向的那个目录，可调整解析深度。",
   "icon": "icon.png",
