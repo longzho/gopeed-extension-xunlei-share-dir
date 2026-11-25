@@ -15,8 +15,18 @@ jobs:
         run: git clone --depth 1 https://github.com/cybdarlnig-png/gopeed-extension-xunlei.git up
       - name: apply patch
         run: python3 patch.py
+      - name: fix manifest url
+        run: |
+          python3 -c "
+          import json
+          p='up/manifest.json'
+          m=json.load(open(p,encoding='utf-8'))
+          m['homepage']='https://github.com/longzho/gopeed-extension-xunlei-share-dir'
+          m['repository']={'url':m['homepage'],'directory':''}
+          json.dump(m,open(p,'w',encoding='utf-8'),ensure_ascii=False,indent=2)
+          "
       - name: copy files
-        run: cp up/index.js up/manifest.json up/icon.png up/README.md .
+        run: cp up/index.js up/manifest.json up/icon.png .
       - name: commit
         run: |
           git config user.name "github-actions[bot]"
