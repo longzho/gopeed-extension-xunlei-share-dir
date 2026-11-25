@@ -1,6 +1,6 @@
 # 迅雷云盘下载扩展（只解析分享目录版）
 
-这是 [cybdarlnig-png/gopeed-extension-xunlei](https://github.com/cybdarlnig-png/gopeed-extension-xunlei) 的 fork，改动只有一处主题：不再从分享根目录把所有文件夹递归读完，而是按分享链接里指向的目录去列。
+这是 [cybdarlnig-png/gopeed-extension-xunlei](https://github.com/cybdarlnig-png/gopeed-extension-xunlei) 的 fork，改动集中在一点：不再从分享根目录把所有文件夹递归读完，而是按分享链接里指向的目录去列。
 
 原版遇到文件很多的分享时，会把整棵树列完才返回，容易超时。
 
@@ -17,20 +17,28 @@
 ## 安装
 
 把本仓库地址粘到 Gopeed「扩展」页的安装链接里。
-
-本仓库是独立的扩展，标识为 `longzho@xunlei-pan-share-dir`，和市场上的官方版（`cybdarlnig-png@xunlei-pan`）不是同一条，两个可以同时装，各自开关、各自保存自己的设置。
+Gopeed 会先克隆这个仓库再读清单，所以安装时要能连上 github ，连不上会直接报 connection timed out，这跟仓库本身无关，换网络或者走代理或换个时间再试。
+为提供更丰富的选择，本仓库设为独立的扩展，标识为 `longzho@xunlei-pan-share-dir`，和市场上的官方版（`cybdarlnig-png@xunlei-pan`）不是同一条，两个可以同时装，各自开关、各自保存自己的设置。
 
 代码和原版同源，署名与授权说明见 `NOTICE.md`。
 
 ## 用法
 
-在浏览器里进入分享的某个子目录，地址会带上 `path`，整条复制给 Gopeed。带子目录路径的链接形如：
+这个扩展只对分享链接生效，比如 https://pan.xunlei.com/s/...。它挂在 onResolve 上，清单里的匹配规则是 *://pan.xunlei.com/s/*，个人网盘、离线下载那类链接不会触发它。
 
-```
+带子目录的分享链接长这样：
+
 https://pan.xunlei.com/s/分享ID?pwd=提取码&path=/目录
-```
 
-如果只复制根目录链接，默认只会解析根这一层，里面只有文件夹、没有直接文件时，会提示你把解析深度改成 1 或更大。（也可能不会提示，我没试过）
+在浏览器里点进分享的某个子目录，地址栏就会带上 path，整条复制给 Gopeed 即可。
+
+「解析深度」的三种取值：
+
+0（默认）：只列链接指向的那一层，里面的子文件夹不展开。
+1：在那一层的基础上，再往下走一层。
+负数：不限深度，等于原版的全树递归，文件多时容易超时。
+
+如果复制的是根目录链接，默认只看根这一层。根里全是文件夹、没有文件时，扩展会直接报错，提示你调深度，或者进子目录再复制链接。（也可能不会提示，我没试过）
 
 ## 凭证
 
