@@ -5,9 +5,9 @@
   "description": "解析迅雷云盘分享链接。默认只读取链接指向的那个目录，可调整解析深度。",
   "icon": "icon.png",
   "version": "0.8.5",
-  "homepage": "https://github.com/longzho/gopeed-extension-xunlei",
+  "homepage": "https://github.com/longzho/gopeed-extension-xunlei-share-dir",
   "repository": {
-    "url": "https://github.com/longzho/gopeed-extension-xunlei",
+    "url": "https://github.com/longzho/gopeed-extension-xunlei-share-dir",
     "directory": ""
   },
   "scripts": [
