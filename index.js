@@ -83,7 +83,8 @@ function parseShareUrl(rawUrl) {
 
   return {
     shareId: decodeURIComponent(parts[1]),
-    passCode: parsed.searchParams.get('pwd') || parsed.searchParams.get('pass_code') || ''
+    passCode: parsed.searchParams.get('pwd') || parsed.searchParams.get('pass_code') || '',
+    path: parsed.searchParams.get('path') || parsed.searchParams.get('parent_path') || ''
   };
 }
 
@@ -722,6 +723,25 @@ function normalizePath(path) {
   return String(path || '').replace(/^\/+|\/+$/g, '');
 }
 
+function parseSharePath(value) {
+  var decoded = String(value || '');
+  try {
+    decoded = decodeURIComponent(decoded);
+  } catch (e) {
+    // 解不开就按原串处理
+  }
+  var segments = decoded.split('/');
+  var result = [];
+  for (var i = 0; i < segments.length; i += 1) {
+    var segment = segments[i].trim();
+    if (!segment || segment === '.') {
+      continue;
+    }
+    result.push(segment);
+  }
+  return result;
+}
+
 function findRestoredFile(records, original) {
   var wantedPath = normalizePath(original.path + getItemName(original.item));
   var matches = [];
@@ -1013,7 +1033,11 @@ async function resolveFiles(share, token, deviceId, userAgent, auth) {
     return items;
   }
 
-  async function walk(parentId, path) {
+  var depthSetting = parseInt(setting('folder_depth', '0'), 10);
+  var depthLimit = isNaN(depthSetting) ? 0 : (depthSetting < 0 ? Infinity : depthSetting);
+  var explicitRoot = false;
+
+  async function walk(parentId, path, level) {
     var items = await listFolder(parentId);
 
     for (var i = 0; i < items.length; i += 1) {
@@ -1022,14 +1046,14 @@ async function resolveFiles(share, token, deviceId, userAgent, auth) {
         if (!itemId) {
           continue;
         }
-      if (!parentId && !state.rootItemIds[itemId]) {
+      if (level === 0 && !explicitRoot && !state.rootItemIds[itemId]) {
         state.rootItemIds[itemId] = true;
         state.rootItems.push(item);
       }
       if (isFolder(item)) {
-        if (!state.folders[itemId]) {
+        if ((depthLimit === Infinity || level + 1 <= depthLimit) && !state.folders[itemId]) {
           state.folders[itemId] = true;
-          await walk(itemId, path + getItemName(item) + '/');
+          await walk(itemId, path + getItemName(item) + '/', level + 1);
         }
       } else {
         if (state.fileItems.length >= MAX_FILES) {
@@ -1040,7 +1064,36 @@ async function resolveFiles(share, token, deviceId, userAgent, auth) {
     }
   }
 
-  await walk('', '');
+  var startParentId = '';
+  var startPath = '';
+  var startFolder = null;
+  var segments = parseSharePath(share.path);
+  if (segments.length) {
+    var parent = '';
+    for (var s = 0; s < segments.length; s += 1) {
+      var listing = await listFolder(parent);
+      var matched = null;
+      for (var m = 0; m < listing.length; m += 1) {
+        var candidate = listing[m];
+        if (isFolder(candidate) && getItemName(candidate) === segments[s]) {
+          matched = candidate;
+          break;
+        }
+      }
+      if (!matched) {
+        throw new Error('分享里找不到链接指定的目录：「' + segments.slice(0, s + 1).join('/') + '」，可以从上级目录的链接重试。');
+      }
+      parent = getItemId(matched);
+      startFolder = matched;
+    }
+    startParentId = parent;
+    startPath = getItemName(startFolder) + '/';
+    explicitRoot = true;
+    state.rootItems.push(startFolder);
+    state.rootItemIds[getItemId(startFolder)] = true;
+  }
+
+  await walk(startParentId, startPath, 0);
   for (var start = 0; start < state.fileItems.length; start += 10) {
     var batch = state.fileItems.slice(start, start + 10);
     await Promise.all(batch.map(function (entry) {
@@ -1048,6 +1101,10 @@ async function resolveFiles(share, token, deviceId, userAgent, auth) {
         entry.info = info;
       });
     }));
+  }
+
+  if (!state.fileItems.length) {
+    throw new Error('当前目录里没有文件。如果文件在下一层目录里，把扩展设置里的“解析深度”改成 1 或更大，或者打开那个子目录后再复制链接。');
   }
 
   var missing = state.fileItems.some(function (entry) {

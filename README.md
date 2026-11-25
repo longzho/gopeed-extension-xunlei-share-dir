@@ -59,8 +59,10 @@ gopeed-extension-xunlei/
 - 标准分享链接：`https://pan.xunlei.com/s/分享ID`
 - 带提取码的分享：`https://pan.xunlei.com/s/分享ID?pwd=提取码`
 - 带目录路径的分享：`https://pan.xunlei.com/s/分享ID?pwd=提取码&path=/目录`
+  在浏览器里进入某个子目录后，地址栏里就带着这个 `path`，整条复制即可
 
-无论链接是否带 `path`，扩展都会从分享根目录开始递归读取全部内容。
+链接里的 `path` 现在会被真正使用。扩展先逐级比对目录名，找到那个目录，再只列它的内容。
+默认「解析深度」为 0，也就是只读当前目录这一层，不往下钻。
 
 ## 功能特性
 

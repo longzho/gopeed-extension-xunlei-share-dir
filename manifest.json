@@ -2,12 +2,12 @@
   "name": "xunlei-pan",
   "author": "cybdarlnig-png",
   "title": "迅雷云盘下载",
-  "description": "解析迅雷云盘分享链接，递归读取完整内容并将文件直链交给 Gopeed 下载。",
+  "description": "解析迅雷云盘分享链接。默认只读取链接指向的那个目录，可调整解析深度。",
   "icon": "icon.png",
-  "version": "0.8.4",
-  "homepage": "https://github.com/cybdarlnig-png/gopeed-extension-xunlei",
+  "version": "0.8.5",
+  "homepage": "https://github.com/longzho/gopeed-extension-xunlei",
   "repository": {
-    "url": "https://github.com/cybdarlnig-png/gopeed-extension-xunlei",
+    "url": "https://github.com/longzho/gopeed-extension-xunlei",
     "directory": ""
   },
   "scripts": [
@@ -53,6 +53,13 @@
       "description": "方式一：从 Chrome 迅雷请求头复制 Authorization；方式二（快捷版）：安装 CookieHub 一键获取 Cookie 和 Authorization：https://github.com/cybdarlnig-png/CookieHub",
       "type": "string",
       "value": ""
+    },
+    {
+      "name": "folder_depth",
+      "title": "解析深度",
+      "description": "从链接指向的目录开始，往下再解析几层。0 = 只解析当前目录；负数 = 不限深度，文件多时容易超时。",
+      "type": "number",
+      "value": "0"
     },
     {
       "name": "autoCleanup",
